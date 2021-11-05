@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Form Status</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="action-style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Side navigation -->
+<div class="sidenav">
+    <a href="http://127.0.0.1:5500/employee-dashboard.html">Welcome <span id="result-empName"></span></a>
+    <a href="http://127.0.0.1:5500/reimb-form.html">Reimbursement Form</a>
+    <a href="http://127.0.0.1:5500/form-status.html">Form Status</a>
+    <a href="http://127.0.0.1:5500/action-required.html">Actions Required</a>
+    <a href="http://127.0.0.1:5500/login-page.html">Logout</a>
+  </div>
+  
+  <!-- Page content -->
+  <div class="main">
+    <h4>Action Required</h4>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+        </div>
+        <div class="panel-body">
+            <table class="table table-striped table-bordered" id="reimbs">
+            </table>
+        </div>
+    </div>
+  </div>
+ 
+</body>
+
+<script>
+    window.addEventListener('load', () => {
+        
+        const empName = localStorage.getItem('empName');
+        document.getElementById("result-empName").innerHTML = empName + "!!";
+      
+        getAllRequestsForApproval();
+
+    })
+
+    async function getAllRequestsForApproval() {
+        const empId1 = localStorage.getItem('empId');
+
+        const url = "http://localhost:7000/reimb/employees/reimbs/" + empId1;
+
+        const httpResponse = await fetch(url);
+        const data = await httpResponse.json();
+        console.log(data); //array of all requests that needs my attention
+
+       extract(data); 
+    }
+
+    function extract(data){
+        let output = document.getElementById("reimbs");
+            output.innerHTML = `
+            <thead><tr>
+            <th>Request Id</th>
+            <th>Date</th>
+            <th>Request By</th>
+            <th>Event Type</th>
+            <th>Cost</th>
+            <th>G/P</th>
+            <th>Status</th>
+            <th>Sup</th>
+            <th>Head</th>
+            <th>BenCo 1st App</th>
+            <th>BenCo 2nd App</th>
+            <th>Amount</th>
+            <th>Final Grade</th>
+            <th>Uploaded File</th>
+            <th colspan="2" style="text-align:center">Actions</th>
+            </tr></thead>
+        `
+
+        data.forEach(r =>{
+            output.innerHTML += 
+            `<tbody><tr>
+             <td>${r.rbId}</td>
+             <td>${r.rbDate}</td>
+             <td>${r.rbName}</td>
+             <td>${r.rbEventId.eventTypes}</td>
+             <td>${r.rbCost}</td>
+             <td>${r.rbEventId.gradingFormat}</td>
+             <td>${r.status}</td>
+             <td>${r.supApproval}</td>
+             <td>${r.deptHeadApproval}</td>
+             <td>${r.benCoApproval}</td>
+             <td>${r.benCoConfirm}</td>
+             <td>${r.awardedAmount}</td>
+             <td>${r.grade}</td>
+             <td>${r.file}</td>
+             <td><button id=${r.rbId} class="btn btn-warning btn-sm" onclick="approve(${r.rbId})">Approve</button></td>
+             <td><button class="btn btn-info btn-sm" onclick="moreInfo(${r.rbId})">Info</button></td>
+             <td><button class="btn btn-success btn-sm" onclick="confirm(${r.rbId})">Confirm</button></td>
+             <td><button class="btn btn-danger btn-sm">Deny</button></td>
+             </tr></tbody>
+             `
+
+        })
+    }
+
+    async function approve(rbId){
+       
+        //add code to change button text
+        let btnSend = document.getElementById(rbId);
+        console.log(btnSend);
+        //btnSend.style.display = "none";
+        btnSend.innerText = "Approved";
+        
+        // btnSend.addEventListener('click', () =>)
+        // let message = document.querySelector('h5');
+        //     btnSend.innerHTML = "Approving...";
+        //     setTimeout(()=>{
+        //         btnSend.style.display = "none";
+        //         message.innerText = 'Approved';
+        //     },3000);
+            
+        
+
+
+        //code to send data to DB to update status
+        const empId1 = localStorage.getItem('empId');
+        const url = "http://localhost:7000/reimb/" + rbId + "/employee/" + empId1;
+     
+        const httpResponse = await fetch(url, {
+	    method: 'PUT',
+	    headers:{
+	    'Content-Type':'application/json'
+	    },
+	    body: rbId, empId1
+        });
+        const body = await httpResponse.json();
+        console.log(body);
+        window.location.reload(false);
+    }
+
+    async function confirm(rbId){
+        //add code to change button text
+        let btnSend = document.getElementById(rbId);
+        console.log(btnSend);
+        //btnSend.style.display = "none";
+        btnSend.innerText = "Approved";
+
+        const empId1 = localStorage.getItem('empId');
+        const url = "http://localhost:7000/reimb/confirm/" + rbId + "/benco/"+ empId1;
+
+        const httpResponse = await fetch(url, {
+        method: 'PUT',
+        headers:{
+        'Content-Type':'application/json'
+        },
+        body: rbId, empId1
+        });
+        const body = await httpResponse.json();
+        console.log(body);
+        window.location.reload(false);
+        }
+
+        //moreInfo
+         async function moreInfo(rbId){
+
+            const url = "http://localhost:7000/reimb/info/" + rbId;
+
+            const httpResponse = await fetch(url)
+            const body = await httpResponse.json();
+            console.log(body); 
+            window.location.reload(false);
+            }
+
+</script>
+</html>
