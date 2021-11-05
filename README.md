@@ -13,7 +13,7 @@ PostgreSQL
 JavaScript
 HTML
 CSS
-JUnit
+JUnit - version 4
 
 Features
 
