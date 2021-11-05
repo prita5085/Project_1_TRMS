@@ -33,9 +33,13 @@ Users if role is benefits coordinators can change the reimbursement amount
 
 Getting Started
 (include git clone command) 
-Windows command to clone: 
+git clone https://github.com/prita5085/Project_1_TRMS.git
 
 (include all environment setup steps)
+On Eclipse IDE, create Maven project
+Add models, dao, services, controller layers in packages
+Add Javalin, postgreSQL, driver Junit, hibernate dependencies in pom.xml
+Visual Studio code for front-end code
 
 Usage
 Steps to use the project. 
